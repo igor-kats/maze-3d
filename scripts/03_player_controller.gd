@@ -7,6 +7,9 @@ class_name PlayerController
 
 var gravity: float = 9.8
 var camera: Camera3D
+var points: int = 0
+
+signal points_changed(new_points: int)
 
 func _ready():
 	# Capture mouse cursor
@@ -65,3 +68,8 @@ func _physics_process(delta):
 		velocity.z = move_toward(velocity.z, 0, movement_speed)
 	
 	move_and_slide()
+
+func add_point():
+	points += 1
+	points_changed.emit(points)
+	print("Point collected! Total points: ", points)

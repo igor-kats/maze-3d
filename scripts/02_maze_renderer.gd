@@ -9,6 +9,9 @@ var maze_generator: MazeGenerator
 var wall_material: StandardMaterial3D
 var floor_material: StandardMaterial3D
 var exit_material: StandardMaterial3D
+var chest_material: StandardMaterial3D
+
+@export var chest_count: int = 15
 
 func _ready():
 	setup_materials()
@@ -53,6 +56,13 @@ func setup_materials():
 	exit_material.emission_color = Color(0.0, 0.3, 0.0)
 	exit_material.roughness = 0.1
 	exit_material.metallic = 0.2
+	
+	# Chest material (golden)
+	chest_material = StandardMaterial3D.new()
+	chest_material.diffuse_color = Color(0.8, 0.6, 0.2)
+	chest_material.emission_color = Color(0.2, 0.15, 0.05)
+	chest_material.roughness = 0.3
+	chest_material.metallic = 0.8
 
 func render_maze():
 	if not maze_generator or maze_generator.maze.is_empty():
@@ -74,6 +84,9 @@ func render_maze():
 				create_wall(x, y)
 			elif maze[y][x] == 2:  # Exit
 				create_exit_marker(x, y)
+	
+	# Create chests
+	create_chests(maze, width, height)
 
 func clear_existing_mesh():
 	for child in get_children():
@@ -141,3 +154,62 @@ func get_maze_position(world_pos: Vector3) -> Vector2i:
 	var x = int(world_pos.x / cell_size)
 	var y = int(world_pos.z / cell_size)
 	return Vector2i(x, y)
+
+func create_chests(maze: Array, width: int, height: int):
+	var path_cells = []
+	
+	# Find all path cells (excluding center starting area and exit)
+	for y in range(height):
+		for x in range(width):
+			if maze[y][x] == 0:  # Path
+				# Skip center 3x3 area (starting area)
+				var center_x = width / 2
+				var center_y = height / 2
+				if abs(x - center_x) > 2 or abs(y - center_y) > 2:
+					path_cells.append([x, y])
+	
+	# Randomly select positions for chests
+	path_cells.shuffle()
+	var chests_to_create = min(chest_count, path_cells.size())
+	
+	for i in range(chests_to_create):
+		var pos = path_cells[i]
+		create_chest(pos[0], pos[1])
+
+func create_chest(x: int, y: int):
+	var chest_body = Area3D.new()
+	chest_body.name = "Chest"
+	
+	# Create chest mesh (simple box for now)
+	var chest_mesh = BoxMesh.new()
+	chest_mesh.size = Vector3(0.8, 0.6, 0.8)
+	
+	var chest_mesh_instance = MeshInstance3D.new()
+	chest_mesh_instance.mesh = chest_mesh
+	chest_mesh_instance.material_override = chest_material
+	
+	# Create collision for interaction
+	var chest_collision = CollisionShape3D.new()
+	var chest_shape = BoxShape3D.new()
+	chest_shape.size = chest_mesh.size
+	chest_collision.shape = chest_shape
+	
+	chest_body.add_child(chest_mesh_instance)
+	chest_body.add_child(chest_collision)
+	chest_body.position = Vector3(x * cell_size + cell_size / 2, 0.3, y * cell_size + cell_size / 2)
+	
+	# Connect collection signal
+	chest_body.body_entered.connect(_on_chest_collected.bind(chest_body))
+	
+	add_child(chest_body)
+
+func _on_chest_collected(chest: Area3D, body):
+	if body.name == "Player":
+		# Remove chest
+		chest.queue_free()
+		
+		# Add point to player
+		if body.has_method("add_point"):
+			body.add_point()
+		
+		print("Chest collected! Points: ", body.points if body.has_signal("points") else "?")
