@@ -32,27 +32,44 @@ func generate_maze():
 	add_crossroads()
 	create_exit()
 
-func carve_path(x: int, y: int):
-	maze[y][x] = 0  # Mark as path
+func carve_path(start_x: int, start_y: int):
+	var stack = [[start_x, start_y]]
+	maze[start_y][start_x] = 0  # Mark starting position as path
 	
-	# Get random directions
-	var directions = [[0, 2], [2, 0], [0, -2], [-2, 0]]
-	directions.shuffle()
-	
-	for dir in directions:
-		var dx = dir[0]
-		var dy = dir[1]
-		var nx = x + dx
-		var ny = y + dy
+	while stack.size() > 0:
+		var current = stack[-1]  # Peek at top of stack
+		var x = current[0]
+		var y = current[1]
 		
-		# Check if new position is valid and unvisited
-		if (nx > 0 and nx < width - 1 and 
-			ny > 0 and ny < height - 1 and 
-			maze[ny][nx] == 1):
+		# Get random directions
+		var directions = [[0, 2], [2, 0], [0, -2], [-2, 0]]
+		directions.shuffle()
+		
+		var found_unvisited = false
+		
+		for dir in directions:
+			var dx = dir[0]
+			var dy = dir[1]
+			var nx = x + dx
+			var ny = y + dy
 			
-			# Carve wall between current and next cell
-			maze[y + dy / 2][x + dx / 2] = 0
-			carve_path(nx, ny)
+			# Check if new position is valid and unvisited
+			if (nx > 0 and nx < width - 1 and 
+				ny > 0 and ny < height - 1 and 
+				maze[ny][nx] == 1):
+				
+				# Carve wall between current and next cell
+				maze[y + dy / 2][x + dx / 2] = 0
+				maze[ny][nx] = 0  # Mark new cell as path
+				
+				# Add new cell to stack
+				stack.push_back([nx, ny])
+				found_unvisited = true
+				break
+		
+		# If no unvisited neighbors, backtrack
+		if not found_unvisited:
+			stack.pop_back()
 
 func ensure_starting_area(start_x: int, start_y: int):
 	# Clear 3x3 area around start
