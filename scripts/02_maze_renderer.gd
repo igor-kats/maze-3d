@@ -1,7 +1,7 @@
 extends Node3D
 class_name MazeRenderer
 
-@export var wall_height: float = 3.0
+@export var wall_height: float = 5.0
 @export var wall_thickness: float = 0.1
 @export var cell_size: float = 2.0
 

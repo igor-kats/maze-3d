@@ -2,8 +2,8 @@ extends Node3D
 class_name MazeGenerator
 
 var maze = []
-var width = 11
-var height = 11
+var width = 21
+var height = 21
 
 func _ready():
 	generate_maze()
