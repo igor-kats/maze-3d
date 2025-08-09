@@ -178,9 +178,9 @@ func create_chests(maze: Array, width: int, height: int):
 
 func create_chest(x: int, y: int):
 	var chest_body = Area3D.new()
-	chest_body.name = "Chest"
+	chest_body.name = "Chest_" + str(x) + "_" + str(y)
 	
-	# Create chest mesh (simple box for now)
+	# Create chest mesh (simple box for now)  
 	var chest_mesh = BoxMesh.new()
 	chest_mesh.size = Vector3(0.8, 0.6, 0.8)
 	
@@ -191,25 +191,16 @@ func create_chest(x: int, y: int):
 	# Create collision for interaction
 	var chest_collision = CollisionShape3D.new()
 	var chest_shape = BoxShape3D.new()
-	chest_shape.size = chest_mesh.size
+	chest_shape.size = Vector3(1.2, 1.2, 1.2)  # Larger collision area
 	chest_collision.shape = chest_shape
 	
 	chest_body.add_child(chest_mesh_instance)
 	chest_body.add_child(chest_collision)
 	chest_body.position = Vector3(x * cell_size + cell_size / 2, 0.3, y * cell_size + cell_size / 2)
 	
-	# Connect collection signal
-	chest_body.body_entered.connect(_on_chest_collected.bind(chest_body))
+	# No signals needed - player will detect chests directly
 	
 	add_child(chest_body)
+	print("Created chest at: ", chest_body.position)
 
-func _on_chest_collected(chest: Area3D, body):
-	if body.name == "Player":
-		# Remove chest
-		chest.queue_free()
-		
-		# Add point to player
-		if body.has_method("add_point"):
-			body.add_point()
-		
-		print("Chest collected! Points: ", body.points if body.has_signal("points") else "?")
+# Chest collection now handled in PlayerController

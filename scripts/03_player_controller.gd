@@ -68,8 +68,26 @@ func _physics_process(delta):
 		velocity.z = move_toward(velocity.z, 0, movement_speed)
 	
 	move_and_slide()
+	
+	# Check for chest collection after movement
+	check_chest_collection()
 
 func add_point():
 	points += 1
 	points_changed.emit(points)
 	print("Point collected! Total points: ", points)
+
+func check_chest_collection():
+	# Get all Area3D nodes in scene (chests)
+	var maze_renderer = get_node("../MazeRenderer")
+	if not maze_renderer:
+		return
+	
+	for child in maze_renderer.get_children():
+		if child is Area3D and child.name.begins_with("Chest_"):
+			var distance = global_position.distance_to(child.global_position)
+			if distance < 1.5:  # Collection range
+				print("Collecting chest: ", child.name)
+				child.queue_free()
+				add_point()
+				break  # Only collect one chest per frame
