@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a 3D Labyrinth Game built using the Godot Engine. The project creates a procedurally generated maze that players can navigate in first-person 3D view to find the exit.
 
-**Current Status**: Maze generation and rendering scripts completed, needs scene setup and additional game systems.
+**Current Status**: Fully playable 3D maze game with first-person controls, procedural textures, and collectible chest system.
 
 ## Development Environment
 
@@ -16,18 +16,20 @@ This is a 3D Labyrinth Game built using the Godot Engine. The project creates a 
 
 ### Project Structure
 ```
-Labyrinth_game/
-├── scripts/                    # GDScript files
-│   ├── 01_maze_generator.gd   # Procedural maze generation
-│   └── 02_maze_renderer.gd    # 3D maze visualization
-├── main.py                    # Python prototype (deprecated)
-├── maze_generator.py          # Python prototype (deprecated)
-├── player.py                  # Python prototype (deprecated)
-├── renderer_3d.py             # Python prototype (deprecated)
-├── requirements.txt           # Python dependencies (deprecated)
-├── CLAUDE.md                  # This file
-├── README.md                  # Project documentation
-└── ROADMAP.md                 # Development roadmap
+maze-3d/
+├── scripts/                      # GDScript files
+│   ├── 01_maze_generator.gd     # Procedural maze generation
+│   ├── 02_maze_renderer.gd      # 3D maze visualization
+│   ├── 03_player_controller.gd  # First-person player controls
+│   └── 04_game_ui.gd           # User interface system
+├── main.py                      # Python prototype (deprecated)
+├── maze_generator.py            # Python prototype (deprecated)
+├── player.py                    # Python prototype (deprecated)
+├── renderer_3d.py               # Python prototype (deprecated)
+├── requirements.txt             # Python dependencies (deprecated)
+├── CLAUDE.md                    # This file
+├── README.md                    # Project documentation
+└── ROADMAP.md                   # Development roadmap
 ```
 
 ## Current Implementation
@@ -35,33 +37,57 @@ Labyrinth_game/
 ### Godot Scene Structure
 ```
 Main (Node3D)
-├── WorldEnvironment          # Environment settings
-├── DirectionalLight3D        # Scene lighting
-├── MeshInstance3D           # Additional mesh objects
-├── maze_generator (Node3D)   # With 01_maze_generator.gd script
-├── MazeRenderer (Node3D)     # With 02_maze_renderer.gd script
-└── Camera3D                 # First-person camera (to be added)
+├── WorldEnvironment            # Environment settings with procedural sky
+├── DirectionalLight3D          # Scene lighting with shadows
+├── MazeGenerator (Node3D)      # With 01_maze_generator.gd script
+├── MazeRenderer (Node3D)       # With 02_maze_renderer.gd script
+├── Player (CharacterBody3D)    # With 03_player_controller.gd script
+│   ├── Camera3D               # First-person camera
+│   └── CollisionShape3D       # Player collision (CapsuleShape3D)
+└── GameUI (Control)            # With 04_game_ui.gd script
 ```
 
 ### Completed Scripts
 
 #### 01_maze_generator.gd
-- **Purpose**: Generates procedural mazes using recursive backtracking
+- **Purpose**: Generates procedural mazes using iterative backtracking
 - **Features**:
-  - 51x51 maze grid with configurable dimensions
+  - Configurable maze grid (default: 21x21, supports up to 101x101+)
+  - Iterative algorithm prevents stack overflow on large mazes
   - Ensures connected paths from center to edges
   - Creates starting area and random exit placement
   - Adds crossroads for more interesting navigation
 - **Key Methods**: `generate_maze()`, `carve_path()`, `create_exit()`
 
 #### 02_maze_renderer.gd  
-- **Purpose**: Renders the maze data as 3D geometry
+- **Purpose**: Renders the maze data as 3D geometry with materials
 - **Features**:
-  - Creates walls, floor, and exit markers
-  - Configurable wall height (3.0m), cell size (2.0m)
-  - Materials: gray walls, dark floor, glowing green exit
-  - Collision detection for walls
-- **Key Methods**: `render_maze()`, `create_wall()`, `create_floor()`
+  - Creates walls, floor, exit markers, and collectible chests
+  - Configurable parameters: wall height (5.0m), cell size (2.0m)
+  - Procedural noise textures: stone walls, cellular floor patterns
+  - Materials: textured walls, dark floor, glowing green exit, golden chests
+  - Collision detection for all objects
+  - Random chest placement (15 chests by default)
+- **Key Methods**: `render_maze()`, `create_wall()`, `create_floor()`, `create_chest()`
+
+#### 03_player_controller.gd
+- **Purpose**: First-person player movement and interaction
+- **Features**:
+  - WASD movement with mouse look controls
+  - Physics-based movement with gravity and jumping
+  - Collision detection with walls
+  - Distance-based chest collection system
+  - Points tracking and scoring
+  - Mouse capture/release with Escape key
+- **Key Methods**: `_physics_process()`, `check_chest_collection()`, `add_point()`
+
+#### 04_game_ui.gd
+- **Purpose**: User interface and HUD display
+- **Features**:
+  - Real-time points display in top-left corner
+  - Clean UI styling with shadows and proper fonts
+  - Signal-based communication with player controller
+- **Key Methods**: `create_ui()`, `_on_points_changed()`
 
 ### Development Commands
 
@@ -79,10 +105,12 @@ Main (Node3D)
 
 ## Performance Considerations
 
-The current implementation generates a 51x51 maze (2,601 cells) which may be intensive for lower-end hardware:
+The current implementation supports large mazes (tested up to 101x101) but performance depends on maze size:
 - Each wall cell creates a StaticBody3D with MeshInstance3D and CollisionShape3D
-- Consider reducing maze size for performance testing
-- Future optimization: use MeshLibrary or procedural mesh generation
+- Default 21x21 maze (~200 walls) runs smoothly on most hardware
+- 101x101 maze (~5,000 walls) may impact performance on lower-end devices
+- Iterative maze generation prevents stack overflow on any maze size
+- Procedural textures are generated once and cached for performance
 
 ## Migration Notes
 
