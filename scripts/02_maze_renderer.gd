@@ -17,18 +17,42 @@ func _ready():
 		call_deferred("render_maze")
 
 func setup_materials():
-	# Wall material (gray)
+	# Wall material with stone-like texture
 	wall_material = StandardMaterial3D.new()
-	wall_material.diffuse_color = Color(0.5, 0.5, 0.5)
+	wall_material.diffuse_color = Color(0.7, 0.6, 0.5)  # Warmer stone color
 	
-	# Floor material (dark gray)
+	# Create procedural noise texture for walls
+	var wall_noise = NoiseTexture2D.new()
+	var wall_noise_source = FastNoiseLite.new()
+	wall_noise_source.noise_type = FastNoiseLite.TYPE_PERLIN
+	wall_noise_source.frequency = 0.1
+	wall_noise.noise = wall_noise_source
+	wall_noise.width = 512
+	wall_noise.height = 512
+	wall_material.albedo_texture = wall_noise
+	wall_material.roughness = 0.8
+	
+	# Floor material with different texture
 	floor_material = StandardMaterial3D.new()
-	floor_material.diffuse_color = Color(0.2, 0.2, 0.2)
+	floor_material.diffuse_color = Color(0.3, 0.3, 0.35)  # Dark stone color
 	
-	# Exit material (green)
+	# Create different noise for floor
+	var floor_noise = NoiseTexture2D.new()
+	var floor_noise_source = FastNoiseLite.new()
+	floor_noise_source.noise_type = FastNoiseLite.TYPE_CELLULAR
+	floor_noise_source.frequency = 0.05
+	floor_noise.noise = floor_noise_source
+	floor_noise.width = 512
+	floor_noise.height = 512
+	floor_material.albedo_texture = floor_noise
+	floor_material.roughness = 0.9
+	
+	# Exit material (glowing green)
 	exit_material = StandardMaterial3D.new()
 	exit_material.diffuse_color = Color(0.0, 1.0, 0.0)
 	exit_material.emission_color = Color(0.0, 0.3, 0.0)
+	exit_material.roughness = 0.1
+	exit_material.metallic = 0.2
 
 func render_maze():
 	if not maze_generator or maze_generator.maze.is_empty():
