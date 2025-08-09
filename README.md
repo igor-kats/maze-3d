@@ -52,11 +52,13 @@ Navigate through a randomly generated 3D labyrinth in first-person view to find 
 1. Install [Godot Engine 4.x](https://godotengine.org/download)
 2. Clone this repository:
    ```bash
-   git clone <repository-url>
-   cd Labyrinth_game
+   git clone https://github.com/igor-kats/maze-3d.git
+   cd maze-3d
    ```
 3. Open Godot and import the project
 4. Open the main scene and run the project
+
+**Note**: The `archive/` folder contains the original Python prototypes and can be ignored for the Godot implementation.
 
 ### Scene Structure Setup
 Create the following scene structure:

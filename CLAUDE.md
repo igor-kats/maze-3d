@@ -17,19 +17,21 @@ This is a 3D Labyrinth Game built using the Godot Engine. The project creates a 
 ### Project Structure
 ```
 maze-3d/
-├── scripts/                      # GDScript files
+├── scripts/                      # GDScript files (production)
 │   ├── 01_maze_generator.gd     # Procedural maze generation
 │   ├── 02_maze_renderer.gd      # 3D maze visualization
 │   ├── 03_player_controller.gd  # First-person player controls
 │   └── 04_game_ui.gd           # User interface system
-├── main.py                      # Python prototype (deprecated)
-├── maze_generator.py            # Python prototype (deprecated)
-├── player.py                    # Python prototype (deprecated)
-├── renderer_3d.py               # Python prototype (deprecated)
-├── requirements.txt             # Python dependencies (deprecated)
+├── archive/                      # Deprecated Python prototypes
+│   ├── main.py                  # Original Python main
+│   ├── maze_generator.py        # Python maze generation
+│   ├── player.py                # Python player logic
+│   ├── renderer_3d.py           # Python 3D rendering
+│   └── requirements.txt         # Python dependencies
 ├── CLAUDE.md                    # This file
 ├── README.md                    # Project documentation
-└── ROADMAP.md                   # Development roadmap
+├── ROADMAP.md                   # Development roadmap
+└── LICENSE                      # Project license
 ```
 
 ## Current Implementation
@@ -114,4 +116,4 @@ The current implementation supports large mazes (tested up to 101x101) but perfo
 
 ## Migration Notes
 
-This project was initially prototyped in Python using pygame but has been migrated to Godot Engine for better 3D capabilities and performance. The Python files remain for reference but are deprecated.
+This project was initially prototyped in Python using pygame but has been migrated to Godot Engine for better 3D capabilities and performance. The original Python prototype files have been moved to the `archive/` folder for reference but are no longer maintained or used in the current implementation.
